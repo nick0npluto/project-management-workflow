@@ -1,0 +1,240 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  EXECUTIVE
+  PROJECT_MANAGER
+  FIELD_SUPERVISOR
+  ADMIN
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+enum RFIStatus {
+  OPEN
+  IN_REVIEW
+  ANSWERED
+  CLOSED
+}
+
+enum RFIPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  BLOCKED
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum DocumentType {
+  PLAN
+  PERMIT
+  CONTRACT
+  INSPECTION
+  PHOTO
+  OTHER
+}
+
+enum FinancialCategory {
+  LABOR
+  MATERIALS
+  EQUIPMENT
+  SUBCONTRACTOR
+  OVERHEAD
+  OTHER
+}
+
+model User {
+  id         String   @id @default(uuid())
+  supabaseId String   @unique @map("supabase_id")
+  email      String   @unique
+  fullName   String   @map("full_name")
+  role       Role     @default(FIELD_SUPERVISOR)
+  avatarUrl  String?  @map("avatar_url")
+  phone      String?
+  title      String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  managedProjects Project[]       @relation("ProjectManager")
+  memberships     ProjectMember[]
+  dailyLogs       DailyLog[]
+  submittedRFIs   RFI[]           @relation("RFISubmitter")
+  assignedRFIs    RFI[]           @relation("RFIAssignee")
+  assignedTasks   Task[]
+
+  @@map("users")
+}
+
+model Project {
+  id            String        @id @default(uuid())
+  projectNumber String?       @unique @map("project_number")
+  name          String
+  description   String?
+  status        ProjectStatus @default(PLANNING)
+  address       String?
+  city          String?
+  state         String?
+  clientName    String?       @map("client_name")
+  startDate     DateTime?     @map("start_date")
+  targetEndDate DateTime?     @map("target_end_date")
+  actualEndDate DateTime?     @map("actual_end_date")
+  budgetTotal   Decimal?      @map("budget_total") @db.Decimal(14, 2)
+  budgetSpent   Decimal       @default(0) @map("budget_spent") @db.Decimal(14, 2)
+  completionPct Int           @default(0) @map("completion_pct")
+  thumbnailUrl  String?       @map("thumbnail_url")
+  managerId     String        @map("manager_id")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  manager          User             @relation("ProjectManager", fields: [managerId], references: [id])
+  members          ProjectMember[]
+  dailyLogs        DailyLog[]
+  rfis             RFI[]
+  documents        Document[]
+  tasks            Task[]
+  financialEntries FinancialEntry[]
+
+  @@map("projects")
+}
+
+model ProjectMember {
+  id        String   @id @default(uuid())
+  projectId String   @map("project_id")
+  userId    String   @map("user_id")
+  role      Role
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@map("project_members")
+}
+
+model DailyLog {
+  id                String   @id @default(uuid())
+  projectId         String   @map("project_id")
+  submittedById     String   @map("submitted_by_id")
+  logDate           DateTime @map("log_date") @db.Date
+  weatherConditions String?  @map("weather_conditions")
+  temperatureF      Int?     @map("temperature_f")
+  workPerformed     String   @map("work_performed")
+  crewCount         Int?     @map("crew_count")
+  hoursWorked       Decimal? @map("hours_worked") @db.Decimal(5, 2)
+  safetyNotes       String?  @map("safety_notes")
+  issues            String?
+  photos            String[] @default([])
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  submittedBy User    @relation(fields: [submittedById], references: [id])
+
+  @@unique([projectId, logDate, submittedById])
+  @@map("daily_logs")
+}
+
+model RFI {
+  id            String      @id @default(uuid())
+  projectId     String      @map("project_id")
+  rfiNumber     Int         @map("rfi_number")
+  title         String
+  description   String
+  status        RFIStatus   @default(OPEN)
+  priority      RFIPriority @default(MEDIUM)
+  submittedById String      @map("submitted_by_id")
+  assignedToId  String?     @map("assigned_to_id")
+  dueDate       DateTime?   @map("due_date")
+  answeredAt    DateTime?   @map("answered_at")
+  answer        String?
+  attachments   String[]    @default([])
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  submittedBy User    @relation("RFISubmitter", fields: [submittedById], references: [id])
+  assignedTo  User?   @relation("RFIAssignee", fields: [assignedToId], references: [id])
+
+  @@unique([projectId, rfiNumber])
+  @@map("rfis")
+}
+
+model Document {
+  id           String       @id @default(uuid())
+  projectId    String       @map("project_id")
+  name         String
+  description  String?
+  type         DocumentType @default(OTHER)
+  fileUrl      String       @map("file_url")
+  fileSize     Int?         @map("file_size")
+  mimeType     String?      @map("mime_type")
+  version      String?      @default("1.0")
+  uploadedById String       @map("uploaded_by_id")
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+model Task {
+  id           String       @id @default(uuid())
+  projectId    String       @map("project_id")
+  title        String
+  description  String?
+  status       TaskStatus   @default(TODO)
+  priority     TaskPriority @default(MEDIUM)
+  assignedToId String?      @map("assigned_to_id")
+  dueDate      DateTime?    @map("due_date")
+  completedAt  DateTime?    @map("completed_at")
+  sortOrder    Int          @default(0) @map("sort_order")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  project    Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedTo User?   @relation(fields: [assignedToId], references: [id])
+
+  @@map("tasks")
+}
+
+model FinancialEntry {
+  id            String            @id @default(uuid())
+  projectId     String            @map("project_id")
+  category      FinancialCategory
+  description   String
+  amount        Decimal           @db.Decimal(14, 2)
+  isExpense     Boolean           @default(true) @map("is_expense")
+  entryDate     DateTime          @map("entry_date") @db.Date
+  vendor        String?
+  invoiceNumber String?           @map("invoice_number")
+  notes         String?
+  createdAt     DateTime          @default(now()) @map("created_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("financial_entries")
+}
