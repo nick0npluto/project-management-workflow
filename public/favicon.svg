@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <rect width="32" height="32" rx="8" fill="oklch(0.28 0.09 252)"/>
+  <path d="M6 22 L10 14 L16 14 L16 12 L24 12 L24 14 L20 14 L20 22" stroke="oklch(0.75 0.18 68)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <rect x="8" y="22" width="16" height="2" rx="1" fill="oklch(0.75 0.18 68)"/>
+  <rect x="14" y="14" width="4" height="8" fill="oklch(0.75 0.18 68)" opacity="0.6"/>
+</svg>

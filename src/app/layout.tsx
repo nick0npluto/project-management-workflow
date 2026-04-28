@@ -20,6 +20,9 @@ export const metadata: Metadata = {
     template: "%s | ProGate",
   },
   description: "Construction project management for Cornerstone Construction",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
@@ -28,10 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <TooltipProvider delayDuration={300}>
           {children}
