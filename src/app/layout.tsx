@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "ProGate",
-    template: "%s | ProGate",
+    default: "ProConstruct",
+    template: "%s | ProConstruct",
   },
   description: "Construction project management for Cornerstone Construction",
   icons: {

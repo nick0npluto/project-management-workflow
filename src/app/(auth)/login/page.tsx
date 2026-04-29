@@ -43,7 +43,7 @@ export default function LoginPage() {
             <HardHat className="h-5 w-5 text-sidebar-primary-foreground" />
           </div>
           <div className="leading-none">
-            <span className="text-base font-bold text-sidebar-foreground">ProGate</span>
+            <span className="text-base font-bold text-sidebar-foreground">ProConstruct</span>
             <p className="text-[10px] text-sidebar-foreground/50 uppercase tracking-widest mt-0.5">Cornerstone Construction</p>
           </div>
         </div>
@@ -53,7 +53,7 @@ export default function LoginPage() {
             Every project.<br />Every team.<br />One platform.
           </h1>
           <p className="text-sidebar-foreground/60 text-sm leading-relaxed max-w-xs">
-            ProGate gives Cornerstone&apos;s teams a single place to manage projects, track daily work, and keep everyone aligned — from the executive suite to the job site.
+            ProConstruct gives Cornerstone&apos;s teams a single place to manage projects, track daily work, and keep everyone aligned — from the executive suite to the job site.
           </p>
         </div>
 
@@ -78,7 +78,7 @@ export default function LoginPage() {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
             <HardHat className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-lg font-bold text-foreground">ProGate</span>
+          <span className="text-lg font-bold text-foreground">ProConstruct</span>
         </div>
 
         <div className="w-full max-w-sm space-y-6">

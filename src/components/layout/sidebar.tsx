@@ -64,7 +64,7 @@ export function Sidebar({ onNavigate, user }: SidebarProps) {
           <HardHat className="h-5 w-5 text-sidebar-primary-foreground" />
         </div>
         <div className="flex flex-col leading-none min-w-0">
-          <span className="text-base font-bold tracking-tight text-sidebar-foreground">ProGate</span>
+          <span className="text-base font-bold tracking-tight text-sidebar-foreground">ProConstruct</span>
           <span className="text-[10px] text-sidebar-foreground/50 uppercase tracking-widest">Cornerstone</span>
         </div>
       </div>

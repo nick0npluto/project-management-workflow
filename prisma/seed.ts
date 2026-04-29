@@ -23,7 +23,7 @@ async function createAuthUser(email: string, password: string) {
 }
 
 async function main() {
-  console.log("🌱 Seeding ProGate demo data...");
+  console.log("🌱 Seeding ProConstruct demo data...");
 
   const [execId, pmId, fieldId, adminId] = await Promise.all([
     createAuthUser("exec@cornerstone.demo", "Password123!"),
@@ -153,10 +153,10 @@ async function main() {
   // ─── Documents ─────────────────────────────────────────────────────────────
   await prisma.document.createMany({
     data: [
-      { projectId: riverside.id, name: "Architectural Plans - SD Set Rev 4", type: "PLAN", fileUrl: "https://placeholder.progate/docs/riverside-sd-rev4.pdf", fileSize: 48_200_000, mimeType: "application/pdf", version: "4.0", uploadedById: pm.id },
-      { projectId: riverside.id, name: "City of Tempe Building Permit", type: "PERMIT", fileUrl: "https://placeholder.progate/docs/riverside-permit.pdf", fileSize: 1_200_000, mimeType: "application/pdf", uploadedById: admin.id },
-      { projectId: riverside.id, name: "General Contract — Desert Sun Properties", type: "CONTRACT", fileUrl: "https://placeholder.progate/docs/riverside-contract.pdf", fileSize: 3_800_000, mimeType: "application/pdf", uploadedById: admin.id },
-      { projectId: riverside.id, name: "MEP Rough-In Inspection Report — Level 2", type: "INSPECTION", fileUrl: "https://placeholder.progate/docs/mep-inspection.pdf", fileSize: 890_000, mimeType: "application/pdf", uploadedById: field.id },
+      { projectId: riverside.id, name: "Architectural Plans - SD Set Rev 4", type: "PLAN", fileUrl: "https://placeholder.proconstruct/docs/riverside-sd-rev4.pdf", fileSize: 48_200_000, mimeType: "application/pdf", version: "4.0", uploadedById: pm.id },
+      { projectId: riverside.id, name: "City of Tempe Building Permit", type: "PERMIT", fileUrl: "https://placeholder.proconstruct/docs/riverside-permit.pdf", fileSize: 1_200_000, mimeType: "application/pdf", uploadedById: admin.id },
+      { projectId: riverside.id, name: "General Contract — Desert Sun Properties", type: "CONTRACT", fileUrl: "https://placeholder.proconstruct/docs/riverside-contract.pdf", fileSize: 3_800_000, mimeType: "application/pdf", uploadedById: admin.id },
+      { projectId: riverside.id, name: "MEP Rough-In Inspection Report — Level 2", type: "INSPECTION", fileUrl: "https://placeholder.proconstruct/docs/mep-inspection.pdf", fileSize: 890_000, mimeType: "application/pdf", uploadedById: field.id },
     ],
   });
 
