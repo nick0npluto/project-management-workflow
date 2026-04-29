@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { HardHat, Eye, EyeOff, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,21 +22,15 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    // Demo shortcut — bypass auth until Supabase is connected
-    await new Promise((r) => setTimeout(r, 800));
+    const supabase = createClient();
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
 
-    const demoEmails = [
-      "exec@cornerstone.demo",
-      "pm@cornerstone.demo",
-      "field@cornerstone.demo",
-      "admin@cornerstone.demo",
-    ];
-
-    if (demoEmails.includes(email) && password === "Password123!") {
-      router.push("/dashboard");
-    } else {
+    if (authError) {
       setError("Invalid email or password.");
       setLoading(false);
+    } else {
+      router.push("/dashboard");
+      router.refresh();
     }
   }
 

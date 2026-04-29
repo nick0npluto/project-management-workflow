@@ -1,5 +1,7 @@
+import { notFound } from "next/navigation";
 import { FileText, FileCheck, FileSignature, Camera, File, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 
 const typeIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -11,13 +13,6 @@ const typeIconMap: Record<string, React.ComponentType<{ className?: string }>> =
   OTHER: File,
 };
 
-const mockDocs = [
-  { id: "d1", name: "Architectural Plans - SD Set Rev 4", type: "PLAN", version: "4.0", uploaderName: "Sarah Chen", fileSize: 48_200_000, createdAt: new Date("2026-04-01") },
-  { id: "d2", name: "City of Tempe Building Permit", type: "PERMIT", version: "1.0", uploaderName: "Lisa Patel", fileSize: 1_200_000, createdAt: new Date("2024-02-15") },
-  { id: "d3", name: "General Contract — Desert Sun Properties", type: "CONTRACT", version: "1.0", uploaderName: "Lisa Patel", fileSize: 3_800_000, createdAt: new Date("2024-03-01") },
-  { id: "d4", name: "MEP Rough-In Inspection Report — Level 2", type: "INSPECTION", version: "1.0", uploaderName: "Diego Ramirez", fileSize: 890_000, createdAt: new Date("2026-04-20") },
-];
-
 function formatFileSize(bytes: number) {
   if (bytes < 1_000_000) return `${(bytes / 1000).toFixed(0)} KB`;
   return `${(bytes / 1_000_000).toFixed(1)} MB`;
@@ -25,7 +20,23 @@ function formatFileSize(bytes: number) {
 
 export default async function DocumentsPage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await params;
-  const docs = projectId === "proj-001" ? mockDocs : [];
+
+  const project = await prisma.project.findUnique({ where: { id: projectId }, select: { id: true } });
+  if (!project) notFound();
+
+  const docs = await prisma.document.findMany({
+    where: { projectId },
+    include: { project: { select: { manager: { select: { fullName: true } } } } },
+    orderBy: { createdAt: "desc" },
+  });
+
+  // Fetch uploader names separately since Document has uploadedById but no relation
+  const uploaderIds = [...new Set(docs.map((d) => d.uploadedById))];
+  const uploaders = await prisma.user.findMany({
+    where: { id: { in: uploaderIds } },
+    select: { id: true, fullName: true },
+  });
+  const uploaderMap = Object.fromEntries(uploaders.map((u) => [u.id, u.fullName]));
 
   return (
     <div className="space-y-4 max-w-4xl">
@@ -52,9 +63,13 @@ export default async function DocumentsPage({ params }: { params: Promise<{ proj
                 <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">Name</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground w-28">Type</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground w-16">Ver.</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground w-32">Uploaded By</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground w-32 hidden md:table-cell">
+                  Uploaded By
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground w-28">Date</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground w-20">Size</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground w-20 hidden md:table-cell">
+                  Size
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -68,11 +83,19 @@ export default async function DocumentsPage({ params }: { params: Promise<{ proj
                         <span className="font-medium text-foreground">{doc.name}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">{doc.type.charAt(0) + doc.type.slice(1).toLowerCase()}</td>
-                    <td className="px-4 py-3 text-muted-foreground font-mono text-xs">v{doc.version}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{doc.uploaderName}</td>
+                    <td className="px-4 py-3 text-muted-foreground capitalize">
+                      {doc.type.charAt(0) + doc.type.slice(1).toLowerCase()}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground font-mono text-xs">
+                      v{doc.version ?? "1.0"}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
+                      {uploaderMap[doc.uploadedById] ?? "—"}
+                    </td>
                     <td className="px-4 py-3 text-muted-foreground">{formatDate(doc.createdAt)}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{formatFileSize(doc.fileSize)}</td>
+                    <td className="px-4 py-3 text-muted-foreground hidden md:table-cell">
+                      {doc.fileSize ? formatFileSize(doc.fileSize) : "—"}
+                    </td>
                   </tr>
                 );
               })}

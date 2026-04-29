@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   FolderOpen,
@@ -13,6 +13,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -22,12 +23,38 @@ const navItems = [
   { label: "Settings",  href: "/settings",  icon: Settings },
 ];
 
-interface SidebarProps {
-  onNavigate?: () => void;
+const roleLabel: Record<string, string> = {
+  EXECUTIVE: "Executive",
+  PROJECT_MANAGER: "Project Manager",
+  FIELD_SUPERVISOR: "Field Supervisor",
+  ADMIN: "Admin / Accounting",
+};
+
+interface SidebarUser {
+  fullName: string;
+  role: string;
+  title: string | null;
 }
 
-export function Sidebar({ onNavigate }: SidebarProps) {
+interface SidebarProps {
+  onNavigate?: () => void;
+  user?: SidebarUser | null;
+}
+
+export function Sidebar({ onNavigate, user }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleSignOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }
+
+  const initials = user
+    ? user.fullName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+    : "?";
 
   return (
     <aside className="flex h-full w-64 flex-col bg-sidebar text-sidebar-foreground">
@@ -70,15 +97,22 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       <div className="border-t border-sidebar-border p-4 shrink-0">
         <div className="flex items-center gap-3 rounded-lg px-2 py-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground text-sm font-semibold shrink-0">
-            SC
+            {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-sidebar-foreground truncate">Sarah Chen</p>
-            <p className="text-xs text-sidebar-foreground/50 truncate">Project Manager</p>
+            <p className="text-sm font-medium text-sidebar-foreground truncate">
+              {user?.fullName ?? "Loading..."}
+            </p>
+            <p className="text-xs text-sidebar-foreground/50 truncate">
+              {user ? (user.title ?? roleLabel[user.role] ?? user.role) : ""}
+            </p>
           </div>
-          <Link href="/login" className="text-sidebar-foreground/40 hover:text-sidebar-foreground/70 transition-colors">
+          <button
+            onClick={handleSignOut}
+            className="text-sidebar-foreground/40 hover:text-sidebar-foreground/70 transition-colors"
+          >
             <LogOut className="h-4 w-4" />
-          </Link>
+          </button>
         </div>
       </div>
     </aside>
