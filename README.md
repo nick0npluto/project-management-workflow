@@ -1,3 +1,7 @@
+Screenshots:
+<img width="1470" height="956" alt="Screenshot 2026-04-29 at 3 09 32 AM" src="https://github.com/user-attachments/assets/d9eadca5-c5fc-4df2-aced-cf3be33e2be9" />
+
+
 🚀 Overview
 This system models real-world coordination between multiple user roles, centralizing workflows such as task management, document handling, and structured request lifecycles into a unified platform.
 It is designed to demonstrate how modern applications enforce:
