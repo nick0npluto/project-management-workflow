@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+🚀 Overview
+This system models real-world coordination between multiple user roles, centralizing workflows such as task management, document handling, and structured request lifecycles into a unified platform.
+It is designed to demonstrate how modern applications enforce:
+multi-role collaboration
+controlled state transitions
+secure backend operations
+consistent system-wide data logic
 
-## Getting Started
+🎯 Problem
+Operational teams often rely on fragmented tools (spreadsheets, messaging, email), leading to:
+lack of visibility into project status
+unclear ownership of tasks and requests
+inconsistent workflows and communication gaps
+This system provides a structured solution by enforcing workflows and centralizing operational data.
 
-First, run the development server:
+🧩 Core Features
+Workflow Management
+State-driven lifecycle system (e.g., OPEN → IN_REVIEW → ANSWERED → CLOSED)
+Enforced transitions for process consistency and auditability
+Role-Based Access Control (RBAC)
+Granular permissions across multiple user roles
+Backend-enforced authorization for sensitive actions
+Project & Task Management
+Centralized project views with task tracking and operational context
+Structured coordination across multiple contributors
+Document Management
+File upload and lifecycle handling with access control
+Metadata tracking for organization and traceability
+Dashboards & Insights
+Financial and operational metrics (budget vs. actuals, trends, variance)
+Designed to support data-driven decision-making
 
-```bash
+🏗️ System Design
+The system is built with a focus on modularity, scalability, and maintainability:
+Separation between UI, API, and data layers
+Backend-enforced validation for workflows and permissions
+Centralized data models to ensure consistency across features
+Extensible architecture for future automation and AI integration
+
+🛠️ Tech Stack
+Frontend: Next.js (App Router), TypeScript
+Backend: API Routes (Node.js)
+Database: PostgreSQL (via Supabase)
+ORM: Prisma
+Auth & Storage: Supabase
+Styling: Tailwind CSS
+Charts: Recharts
+
+⚙️ Local Development
+Prerequisites
+Node.js 20+
+npm
+Docker Desktop
+Supabase CLI
+Setup
+npm install
+supabase start
+Create .env:
+NEXT_PUBLIC_SUPABASE_URL="http://127.0.0.1:54321"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="..."
+SUPABASE_SERVICE_ROLE_KEY="..."
+DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+Apply schema and seed data:
+npm run db:push
+npm run db:seed
+Run locally:
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+🧪 Demo Usage
+The application includes seeded demo data to simulate real workflows and interactions across multiple roles.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+🧠 Architecture Notes
+Server components used for data-fetching; client components for interactivity
+Workflow validation and permissions enforced at the API layer
+Data serialization handled for Prisma types across server/client boundaries
+Designed to maintain consistency across dashboards, workflows, and reports
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+🔮 Future Improvements
+AI-assisted workflow automation (LLM integration)
+Workflow optimization and recommendation systems
+Event-driven architecture for real-time updates
+Enhanced analytics and reporting
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+⚠️ Notes
+This project is a generalized and simplified version of a larger system, intended to demonstrate architecture and engineering patterns without exposing proprietary implementation details.
