@@ -1,5 +1,5 @@
 Screenshots:
-<img width="1470" height="956" alt="Screenshot 2026-04-29 at 3 09 32 AM" src="https://github.com/user-attachments/assets/d9eadca5-c5fc-4df2-aced-cf3be33e2be9" />
+<img width="1470" height="790" alt="Screenshot 2026-04-30 at 1 54 22 AM" src="https://github.com/user-attachments/assets/6266c439-2b95-49ba-98bf-a022fb6c1169" />
 
 
 🚀 Overview
