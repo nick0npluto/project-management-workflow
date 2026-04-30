@@ -21,7 +21,9 @@ export const metadata: Metadata = {
   },
   description: "Construction project management for Cornerstone Construction",
   icons: {
-    icon: "/favicon.svg",
+    icon: "/cornerstone%20logo.png",
+    shortcut: "/cornerstone%20logo.png",
+    apple: "/cornerstone%20logo.png",
   },
 };
 

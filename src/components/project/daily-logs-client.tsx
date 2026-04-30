@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { CloudSun, Users, Clock, AlertCircle, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { SectionHeader } from "@/components/project/section-header";
 import { formatDate } from "@/lib/utils";
 
 interface Log {
@@ -74,19 +75,17 @@ export function DailyLogsClient({ projectId, logs }: { projectId: string; logs: 
   }
 
   return (
-    <div className="space-y-4 max-w-3xl">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-base font-semibold text-foreground">Daily Logs</h2>
-          <p className="text-sm text-muted-foreground">
-            {logs.length} log{logs.length !== 1 ? "s" : ""} submitted
-          </p>
-        </div>
-        <Button size="sm" onClick={() => setShowForm(true)}>
-          <Plus className="h-4 w-4 mr-1.5" />
-          Submit Log
-        </Button>
-      </div>
+    <div className="space-y-4">
+      <SectionHeader
+        title="Daily Logs"
+        description={`${logs.length} log${logs.length !== 1 ? "s" : ""} submitted`}
+        action={
+          <Button size="sm" className="w-full sm:w-auto" onClick={() => setShowForm(true)}>
+            <Plus className="h-4 w-4 mr-1.5" />
+            Submit Log
+          </Button>
+        }
+      />
 
       {showForm && (
         <Card className="shadow-sm border-primary/30 bg-primary/5">

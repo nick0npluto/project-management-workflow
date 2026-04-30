@@ -31,7 +31,7 @@ export default async function ReportsPage() {
   const portfolioBudget = projects.reduce((s, p) => s + Number(p.budgetTotal ?? 0), 0);
   const portfolioSpent = projects.reduce((s, p) => s + Number(p.budgetSpent), 0);
   const openRFIs = rfiCounts
-    .filter((r) => r.status === "OPEN" || r.status === "IN_REVIEW")
+    .filter((r) => r.status === "OPEN")
     .reduce((s, r) => s + r._count.id, 0);
 
   const rfiStatusMap: Record<string, number> = {};
@@ -66,7 +66,7 @@ export default async function ReportsPage() {
           {[
             { label: "Portfolio Budget", value: formatCurrency(portfolioBudget), sub: `${projects.length} projects` },
             { label: "Total Spent",      value: formatCurrency(portfolioSpent),  sub: `${portfolioPct}% utilized`, alert: portfolioPct >= 85 },
-            { label: "Open RFIs",        value: String(openRFIs),               sub: "Awaiting response" },
+            { label: "Open RFIs",        value: String(openRFIs),               sub: "New / unassigned" },
             { label: "Overdue Tasks",    value: String(overdueTasks),            sub: "Past due date", alert: overdueTasks > 0 },
           ].map(({ label, value, sub, alert }) => (
             <Card key={label} className="shadow-sm">

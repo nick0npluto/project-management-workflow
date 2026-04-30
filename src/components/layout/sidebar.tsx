@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -8,7 +9,6 @@ import {
   BarChart3,
   Settings,
   Shield,
-  HardHat,
   ChevronRight,
   LogOut,
 } from "lucide-react";
@@ -60,8 +60,15 @@ export function Sidebar({ onNavigate, user }: SidebarProps) {
     <aside className="flex h-full w-64 flex-col bg-sidebar text-sidebar-foreground">
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 px-6 border-b border-sidebar-border shrink-0">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary shrink-0">
-          <HardHat className="h-5 w-5 text-sidebar-primary-foreground" />
+        <div className="relative h-8 w-8 overflow-hidden rounded-md bg-white shrink-0">
+          <Image
+            src="/cornerstone logo.png"
+            alt="Cornerstone Construction Co. logo"
+            fill
+            className="object-cover"
+            sizes="32px"
+            priority
+          />
         </div>
         <div className="flex flex-col leading-none min-w-0">
           <span className="text-base font-bold tracking-tight text-sidebar-foreground">ProConstruct</span>

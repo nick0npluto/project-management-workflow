@@ -1,31 +1,30 @@
 import { notFound } from "next/navigation";
-import { CheckCircle2, Clock, AlertCircle, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { TasksPanelClient } from "@/components/project/tasks-panel-client";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 import { formatCurrency, formatDate, budgetPercentage } from "@/lib/utils";
-
-const taskIconMap = {
-  DONE: CheckCircle2,
-  IN_PROGRESS: Clock,
-  BLOCKED: XCircle,
-  TODO: AlertCircle,
-};
-const taskColorMap = {
-  DONE: "text-emerald-600",
-  IN_PROGRESS: "text-blue-600",
-  BLOCKED: "text-red-600",
-  TODO: "text-slate-400",
-};
 
 export default async function OverviewPage({ params }: { params: Promise<{ projectId: string }> }) {
   const { projectId } = await params;
+  const supabase = await createClient();
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
 
-  const [project, tasks, logs] = await Promise.all([
+  const appUser = authUser
+    ? await prisma.user.findUnique({
+        where: { supabaseId: authUser.id },
+        select: { id: true, role: true },
+      })
+    : null;
+
+  const [project, tasks, logs, members] = await Promise.all([
     prisma.project.findUnique({
       where: { id: projectId },
-      include: { manager: { select: { fullName: true } } },
+      include: { manager: { select: { id: true, fullName: true } } },
     }),
     prisma.task.findMany({
       where: { projectId },
@@ -38,6 +37,10 @@ export default async function OverviewPage({ params }: { params: Promise<{ proje
       orderBy: { logDate: "desc" },
       take: 3,
     }),
+    prisma.projectMember.findMany({
+      where: { projectId },
+      select: { user: { select: { id: true, fullName: true } } },
+    }),
   ]);
 
   if (!project) notFound();
@@ -45,7 +48,27 @@ export default async function OverviewPage({ params }: { params: Promise<{ proje
   const budgetTotal = project.budgetTotal != null ? Number(project.budgetTotal) : null;
   const budgetSpent = Number(project.budgetSpent);
   const budgetPct = budgetPercentage(budgetSpent, budgetTotal);
-  const openTasks = tasks.filter((t) => t.status !== "DONE");
+
+  const assigneeMap = new Map<string, { id: string; fullName: string }>();
+  assigneeMap.set(project.manager.id, project.manager);
+  for (const member of members) assigneeMap.set(member.user.id, member.user);
+  const assignees = Array.from(assigneeMap.values()).sort((a, b) => a.fullName.localeCompare(b.fullName));
+
+  const canCreateTask =
+    appUser != null &&
+    appUser.role !== "EXECUTIVE" &&
+    (appUser.role === "ADMIN" ||
+      appUser.id === project.manager.id ||
+      members.some((member) => member.user.id === appUser.id));
+
+  const serializedTasks = tasks.map((task) => ({
+    id: task.id,
+    title: task.title,
+    status: task.status,
+    priority: task.priority,
+    dueDate: task.dueDate ? task.dueDate.toISOString() : null,
+    assignedTo: task.assignedTo,
+  }));
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -88,43 +111,12 @@ export default async function OverviewPage({ params }: { params: Promise<{ proje
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Open Tasks
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {openTasks.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">All tasks complete.</p>
-            ) : (
-              openTasks.map((task) => {
-                const Icon = taskIconMap[task.status];
-                const color = taskColorMap[task.status];
-                return (
-                  <div key={task.id} className="flex items-start gap-3 py-2 border-b border-border last:border-0">
-                    <Icon className={`h-4 w-4 mt-0.5 shrink-0 ${color}`} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground">{task.title}</p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <StatusBadge type="task" value={task.status} />
-                        <StatusBadge type="priority" value={task.priority} />
-                        {task.dueDate && (
-                          <span className="text-xs text-muted-foreground">Due {formatDate(task.dueDate)}</span>
-                        )}
-                      </div>
-                    </div>
-                    {task.assignedTo && (
-                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold shrink-0">
-                        {task.assignedTo.fullName.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                      </div>
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </CardContent>
-        </Card>
+        <TasksPanelClient
+          projectId={projectId}
+          initialTasks={serializedTasks}
+          assignees={assignees}
+          canCreate={canCreateTask}
+        />
 
         {logs.length > 0 && (
           <Card className="shadow-sm">

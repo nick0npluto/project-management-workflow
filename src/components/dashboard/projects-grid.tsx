@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ProjectCard } from "@/components/dashboard/project-card";
+import { NewProjectModal } from "@/components/dashboard/new-project-modal";
 import { EmptyState } from "@/components/shared/empty-state";
 
 const STATUS_FILTERS = ["All", "Active", "Planning", "On Hold", "Completed"] as const;
@@ -23,35 +24,39 @@ interface Project {
   city: string | null;
   state: string | null;
   clientName: string | null;
-  targetEndDate: Date | null;
-  budgetTotal: unknown;
-  budgetSpent: unknown;
+  targetEndDate: string | null;
+  budgetTotal: number | null;
+  budgetSpent: number;
   completionPct: number;
   manager: { id: string; fullName: string; avatarUrl: string | null };
   _count: { rfis: number; tasks: number; dailyLogs: number };
 }
 
-export function ProjectsGrid({ projects }: { projects: Project[] }) {
+interface Manager {
+  id: string;
+  fullName: string;
+}
+
+export function ProjectsGrid({ projects, managers }: { projects: Project[]; managers: Manager[] }) {
   const [filter, setFilter] = useState<FilterValue>("All");
   const [search, setSearch] = useState("");
 
-  const serialized = projects.map((p) => ({
-    ...p,
-    budgetTotal: p.budgetTotal != null ? Number(p.budgetTotal) : null,
-    budgetSpent: Number(p.budgetSpent),
-    targetEndDate: p.targetEndDate ? new Date(p.targetEndDate) : null,
-  }));
-
-  const filteredSerialized = serialized.filter((p) => {
+  const filtered = projects.filter((p) => {
     if (filterMap[filter] && p.status !== filterMap[filter]) return false;
     if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
 
+  const filteredSerialized = filtered.map((p) => ({
+    ...p,
+    targetEndDate: p.targetEndDate ? new Date(p.targetEndDate) : null,
+  }));
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         <h2 className="text-base font-semibold text-foreground flex-1">Projects</h2>
+        {managers.length > 0 && <NewProjectModal managers={managers} />}
         <input
           type="text"
           placeholder="Filter projects..."

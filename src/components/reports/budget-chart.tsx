@@ -44,7 +44,7 @@ export function BudgetChart({ projects }: { projects: ProjectBudget[] }) {
         />
         <Legend wrapperStyle={{ fontSize: 12 }} />
         <Bar dataKey="budgetTotal" name="Budget" fill="oklch(0.55 0.12 252)" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="budgetSpent" name="Spent" radius={[4, 4, 0, 0]}>
+        <Bar dataKey="budgetSpent" name="Spent" fill="oklch(0.75 0.18 68)" radius={[4, 4, 0, 0]}>
           {projects.map((p, i) => {
             const pct = p.budgetTotal > 0 ? p.budgetSpent / p.budgetTotal : 0;
             const color = pct >= 0.85 ? "oklch(0.65 0.18 38)" : "oklch(0.75 0.18 68)";

@@ -2,8 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, MapPin, User } from "lucide-react";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { ProjectStatusControl } from "@/components/project/project-status-control";
 import { ProjectTabs } from "@/components/project/project-tabs";
 import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/utils";
 
 export default async function ProjectLayout({
@@ -14,14 +16,25 @@ export default async function ProjectLayout({
   params: Promise<{ projectId: string }>;
 }) {
   const { projectId } = await params;
+  const supabase = await createClient();
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+
+  const appUser = authUser
+    ? await prisma.user.findUnique({
+        where: { supabaseId: authUser.id },
+        select: { id: true, role: true },
+      })
+    : null;
 
   const project = await prisma.project.findUnique({
     where: { id: projectId },
     include: {
-      manager: { select: { fullName: true } },
+      manager: { select: { id: true, fullName: true } },
       _count: {
         select: {
-          rfis: { where: { status: { in: ["OPEN", "IN_REVIEW"] } } },
+          rfis: { where: { status: "OPEN" } },
           tasks: true,
         },
       },
@@ -29,6 +42,11 @@ export default async function ProjectLayout({
   });
 
   if (!project) notFound();
+
+  const canEditStatus =
+    appUser != null &&
+    (appUser.role === "ADMIN" ||
+      (appUser.role === "PROJECT_MANAGER" && project.manager.id === appUser.id));
 
   return (
     <div className="flex flex-col flex-1">
@@ -48,6 +66,9 @@ export default async function ProjectLayout({
                 <span className="text-xs font-mono text-muted-foreground">{project.projectNumber}</span>
               )}
               <StatusBadge type="project" value={project.status} />
+              {canEditStatus && (
+                <ProjectStatusControl projectId={projectId} currentStatus={project.status} />
+              )}
             </div>
             <h1 className="text-xl font-bold text-foreground">{project.name}</h1>
             <div className="flex flex-wrap items-center gap-4 mt-1.5 text-sm text-muted-foreground">

@@ -30,7 +30,7 @@ export function StatsCards({ activeProjects, totalBudget, openRFIs, overdueTasks
       value: openRFIs.toString(),
       icon: AlertCircle,
       iconClass: openRFIs > 2 ? "text-orange-600 bg-orange-50" : "text-slate-500 bg-slate-100",
-      change: openRFIs > 0 ? `${openRFIs} need response` : "All clear",
+      change: openRFIs > 0 ? `${openRFIs} pending triage` : "All clear",
     },
     {
       label: "Overdue Tasks",
