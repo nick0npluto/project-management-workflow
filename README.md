@@ -13,6 +13,7 @@ unclear ownership of tasks and requests
 inconsistent workflows and communication gaps
 This system provides a structured solution by enforcing workflows and centralizing operational data.
 
+
 🧩 Core Features
 Workflow Management
 State-driven lifecycle system (e.g., OPEN → IN_REVIEW → ANSWERED → CLOSED)
